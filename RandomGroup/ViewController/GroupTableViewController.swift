@@ -13,11 +13,20 @@ import CoreData
 class GroupTableViewController: UITableViewController {
     
 
+    var person: Person?
+    
     let fetchRequestController: NSFetchedResultsController<Person> = {
         let internalFetchRequest: NSFetchRequest<Person> = Person.fetchRequest()
         internalFetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-        return NSFetchedResultsController(fetchRequest: internalFetchRequest, managedObjectContext: CoreDataStack.context, sectionNameKeyPath: nil, cacheName: nil)
         
+        let controller = NSFetchedResultsController(fetchRequest: internalFetchRequest, managedObjectContext: CoreDataStack.context, sectionNameKeyPath: nil, cacheName: nil)
+
+        do {
+            try controller.performFetch()
+        } catch let error {
+            print("baaaaad \(error)")
+        }
+        return controller
     }()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,13 +45,20 @@ class GroupTableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        guard let number = fetchRequestController.fetchedObjects?.count else { return 0 }
-        let newNumber = number / 2
+        guard let number = fetchRequestController.fetchedObjects?.count else { return 2 }
+        var newNumber = number / 2
+        if newNumber % 2 != 0 {
+            newNumber += 1
+        }
         return newNumber
+//        return fetchRequestController.fetchedObjects?.count ?? 0
+//        return (fetchRequestController.fetchedObjects?.count)! / 2 ?? 0
+      //  return 1
+
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchRequestController.fetchedObjects?.count ?? 0
+        return fetchRequestController.fetchedObjects?.count ?? 2
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -64,8 +80,22 @@ class GroupTableViewController: UITableViewController {
     }
 
     @IBAction func addButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(title: "Add a person!", message: nil, preferredStyle: .alert)
+        alertController.addTextField { (newlyAddedTextField) in
+            newlyAddedTextField.placeholder = "Enter persons name..."
+        }
+        let addAction = UIAlertAction(title: "Add", style: .default) { (_) in
+            guard let personName = alertController.textFields?[0].text else { return }
+            PersonController.shared.add(name: personName)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
+        alertController.addAction(addAction)
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
     }
+    
+    
     @IBAction func randomizeButtonTapped(_ sender: Any) {
         
     }
