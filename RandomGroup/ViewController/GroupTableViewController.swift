@@ -9,18 +9,12 @@
 import UIKit
 import CoreData
 
-
 class GroupTableViewController: UITableViewController {
-    
-
     var person: Person?
-    
     let fetchRequestController: NSFetchedResultsController<Person> = {
         let internalFetchRequest: NSFetchRequest<Person> = Person.fetchRequest()
         internalFetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-        
         let controller = NSFetchedResultsController(fetchRequest: internalFetchRequest, managedObjectContext: CoreDataStack.context, sectionNameKeyPath: nil, cacheName: nil)
-
         do {
             try controller.performFetch()
         } catch let error {
@@ -43,7 +37,6 @@ class GroupTableViewController: UITableViewController {
     }
 
     // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
         guard let number = fetchRequestController.fetchedObjects?.count else { return 2 }
         var newNumber = number / 2
@@ -51,19 +44,14 @@ class GroupTableViewController: UITableViewController {
             newNumber += 1
         }
         return newNumber
-//        return fetchRequestController.fetchedObjects?.count ?? 0
-//        return (fetchRequestController.fetchedObjects?.count)! / 2 ?? 0
-      //  return 1
-
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchRequestController.fetchedObjects?.count ?? 2
+        return 2
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "nameCell", for: indexPath)
-
         guard let people = fetchRequestController.fetchedObjects else { return UITableViewCell() }
         let person = people[indexPath.row]
         cell.textLabel?.text = person.name
@@ -77,6 +65,10 @@ class GroupTableViewController: UITableViewController {
                 PersonController.shared.delete(person: person)
             }
         }
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return "Group \(section + 1)"
     }
 
     @IBAction func addButtonTapped(_ sender: Any) {
@@ -95,13 +87,9 @@ class GroupTableViewController: UITableViewController {
         self.present(alertController, animated: true, completion: nil)
     }
     
-    
     @IBAction func randomizeButtonTapped(_ sender: Any) {
-        
     }
-
 }
-
 
 // MARK: - FetchResultsControllerDelegate Methods
 extension GroupTableViewController: NSFetchedResultsControllerDelegate {
